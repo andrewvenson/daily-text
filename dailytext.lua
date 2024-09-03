@@ -45,16 +45,15 @@ end
 
 local function add_formatting(scripture, text, terminal_rows, terminal_cols)
 	local scrip = "\27[3;31;4m" .. scripture .. "\27[0m"
-	local txt = "\27[3;33;40m" .. text .. "\27[0m"
+	local txt = text
 	local rows = terminal_rows
 	local cols = terminal_cols
 	local txt_length = string.len(txt)
-	local new_text = ""
 	local texts_to_print = {}
 	local texts_to_print_length = 0
-
 	local x = 0
 	local y = 0
+
 	while txt_length ~= x do
 		if x ~= 0 and x % terminal_cols == 0 then
 			local new_y = y
@@ -62,8 +61,9 @@ local function add_formatting(scripture, text, terminal_rows, terminal_cols)
 				new_y = y + 1
 			end
 
-			local txt_to_set = string.sub(txt, new_y, x)
+			local txt_to_set = "\27[3;33;40m" .. string.sub(txt, new_y, x) .. "\27[0m"
 			while cols ~= 0 + math.floor(string.len(string.sub(txt, new_y, x)) / 2) do
+				-- adds padding to left of scripture text to center horizontally in console
 				txt_to_set = " " .. txt_to_set
 				cols = cols - 1
 			end
@@ -77,15 +77,17 @@ local function add_formatting(scripture, text, terminal_rows, terminal_cols)
 
 	if txt_length % cols ~= 0 then
 		if string.sub(txt, y, y) == " " then
-			local txt_to_set = string.sub(txt, y + 1)
+			local txt_to_set = "\27[3;33;40m" .. string.sub(txt, y + 1) .. "\27[0m"
 			while cols ~= 0 + math.floor(string.len(string.sub(txt, y + 1)) / 2) do
+				-- adds padding to left of scripture text to center horizontally in console
 				txt_to_set = " " .. txt_to_set
 				cols = cols - 1
 			end
 			table.insert(texts_to_print, txt_to_set)
 		else
-			local txt_to_set = string.sub(txt, y)
+			local txt_to_set = "\27[3;33;40m" .. string.sub(txt, y) .. "\27[0m"
 			while cols ~= 0 + math.floor(string.len(string.sub(txt, y)) / 2) do
+				-- adds padding to left of scripture text to center horizontally in console
 				txt_to_set = " " .. txt_to_set
 				cols = cols - 1
 			end
@@ -97,25 +99,32 @@ local function add_formatting(scripture, text, terminal_rows, terminal_cols)
 	cols = terminal_cols
 
 	while cols ~= 0 + string.len(scripture) do
+		-- centers scripture name in console horizontally
 		scrip = " " .. scrip
 		cols = cols - 1
 	end
 
 	while rows ~= 0 do
+		-- centers scripture name in console vertically
 		scrip = "\n" .. scrip
+		-- Adds padding to bottom of last line of text
 		texts_to_print[texts_to_print_length] = texts_to_print[texts_to_print_length] .. "\n"
 		rows = rows - 1
 	end
 
-	for _, v in pairs(texts_to_print) do
-		new_text = new_text .. v
+	local new_text = ""
+	-- appends all scripture text together to be printed
+	for _, text_to_print_value in pairs(texts_to_print) do
+		new_text = new_text .. text_to_print_value
 	end
-	return { scrip, "\n\n" .. new_text }
+
+	return { scrip, new_text }
 end
 
 local function print_random_scripture(scripture, text, terminal_rows, terminal_cols)
 	local formatted_scripture = add_formatting(scripture, text, terminal_rows, terminal_cols)
-	print(formatted_scripture[1], formatted_scripture[2])
+	print(formatted_scripture[1] .. "\n\n")
+	print(formatted_scripture[2])
 end
 
 local function get_and_split_terminal_rows_and_cols()
