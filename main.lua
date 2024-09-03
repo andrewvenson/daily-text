@@ -3,7 +3,7 @@ ARGS = arg
 
 local function get_length_of_table(table)
 	local length = 0
-	for k, v in pairs(table) do
+	for _ in pairs(table) do
 		length = length + 1
 	end
 	return length
@@ -82,13 +82,17 @@ local function print_scripture()
 		-- 1 indexes are crazy
 		local scripture = random_scripture[1]
 		local text = random_scripture[2]
-		local rows_and_cols = get_and_split_terminal_rows_and_cols()
-		local terminal_rows = rows_and_cols[1]
-		local terminal_cols = rows_and_cols[2]
-		print_random_scripture(scripture, text, terminal_rows, terminal_cols)
+		local success, data = pcall(get_and_split_terminal_rows_and_cols)
+		if success then
+			local terminal_rows = data[1]
+			local terminal_cols = data[2]
+			print_random_scripture(scripture, text, terminal_rows, terminal_cols)
+		else
+			error("Error: Failed to get_and_split_terminal_rows_and_cols")
+		end
 		return
 	end
-	print("Error happened. Couldn't find a scripture.")
+	error("Error: Couldn't find a scripture")
 end
 
 local function load_scriptures_from_file()
@@ -126,17 +130,32 @@ local function create_scripture(scripture, text)
 		file:write(text .. "\n")
 		file:close()
 	end
-	if pcall(load_scriptures_from_file) then
+	local success, data = pcall(load_scriptures_from_file)
+	if success then
 		print("Successfully loaded scriptures from file")
 	else
-		print("Failed to load scriptures from file")
+		error("Failed to load scriptures from file", data)
 	end
 	return "success"
 end
 
+local function validate_arg_count()
+	local arg_count = 0
+	for index in pairs(ARGS) do
+		if arg_count > 3 then
+			print('e.g. lua main.lua create "John 3:16" "For God loved the world..."')
+			print("e.g. lua main.lua print")
+			error("Error: Invalid number of arguments")
+		end
+		if index == -1 then
+			break
+		end
+		arg_count = arg_count + 1
+	end
+end
+
 local function main()
 	local load_success, load_data = pcall(load_scriptures_from_file)
-	local arg_count = 0
 
 	if load_success then
 		print("Successfully loaded scriptures from file")
@@ -144,17 +163,12 @@ local function main()
 		print("Failed to load scriptures from file", load_data)
 	end
 
-	for index in pairs(ARGS) do
-		if arg_count > 3 then
-			print("Invalid number of arguments")
-			print('e.g. lua main.lua create "John 3:16" "For God loved the world..."')
-			print("e.g. lua main.lua print")
-			return
-		end
-		if index == -1 then
-			break
-		end
-		arg_count = arg_count + 1
+	local validate_arg_count_success, validate_arg_count_data = pcall(validate_arg_count)
+	if validate_arg_count_success then
+		print("Successfully validated argument count")
+	else
+		print(validate_arg_count_data)
+		return
 	end
 
 	if ARGS[1] == "print" then
@@ -171,7 +185,8 @@ local function main()
 			if success then
 				print("Successfully created scripture")
 			else
-				print("Something went wrong when creating scripture", data)
+				print(data)
+				return
 			end
 		else
 			print("Missing args to create scripture")
