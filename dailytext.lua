@@ -50,6 +50,8 @@ local function add_formatting(scripture, text, terminal_rows, terminal_cols)
 	local cols = terminal_cols
 	local txt_length = string.len(txt)
 	local new_text = ""
+	local texts_to_print = {}
+	local texts_to_print_length = 0
 
 	local x = 0
 	local y = 0
@@ -59,7 +61,15 @@ local function add_formatting(scripture, text, terminal_rows, terminal_cols)
 			if string.sub(txt, y, y) == " " then
 				new_y = y + 1
 			end
-			new_text = new_text .. string.sub(txt, new_y, x) .. "\n"
+
+			local txt_to_set = string.sub(txt, new_y, x)
+			while cols ~= 0 + math.floor(string.len(string.sub(txt, new_y, x)) / 2) do
+				txt_to_set = " " .. txt_to_set
+				cols = cols - 1
+			end
+			cols = terminal_cols
+			table.insert(texts_to_print, txt_to_set .. "\n")
+			texts_to_print_length = texts_to_print_length + 1
 			y = x + 1
 		end
 		x = x + 1
@@ -67,11 +77,24 @@ local function add_formatting(scripture, text, terminal_rows, terminal_cols)
 
 	if txt_length % cols ~= 0 then
 		if string.sub(txt, y, y) == " " then
-			new_text = new_text .. string.sub(txt, y + 1)
+			local txt_to_set = string.sub(txt, y + 1)
+			while cols ~= 0 + math.floor(string.len(string.sub(txt, y + 1)) / 2) do
+				txt_to_set = " " .. txt_to_set
+				cols = cols - 1
+			end
+			table.insert(texts_to_print, txt_to_set)
 		else
-			new_text = new_text .. string.sub(txt, y)
+			local txt_to_set = string.sub(txt, y)
+			while cols ~= 0 + math.floor(string.len(string.sub(txt, y)) / 2) do
+				txt_to_set = " " .. txt_to_set
+				cols = cols - 1
+			end
+			table.insert(texts_to_print, txt_to_set)
 		end
+		texts_to_print_length = texts_to_print_length + 1
 	end
+
+	cols = terminal_cols
 
 	while cols ~= 0 + string.len(scripture) do
 		scrip = " " .. scrip
@@ -80,8 +103,12 @@ local function add_formatting(scripture, text, terminal_rows, terminal_cols)
 
 	while rows ~= 0 do
 		scrip = "\n" .. scrip
-		new_text = new_text .. "\n"
+		texts_to_print[texts_to_print_length] = texts_to_print[texts_to_print_length] .. "\n"
 		rows = rows - 1
+	end
+
+	for _, v in pairs(texts_to_print) do
+		new_text = new_text .. v
 	end
 	return { scrip, "\n\n" .. new_text }
 end
