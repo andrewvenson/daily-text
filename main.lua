@@ -156,11 +156,11 @@ end
 
 local function main()
 	local load_success, load_data = pcall(load_scriptures_from_file)
-
 	if load_success then
 		print("Successfully loaded scriptures from file")
 	else
 		print("Failed to load scriptures from file", load_data)
+		return
 	end
 
 	local validate_arg_count_success, validate_arg_count_data = pcall(validate_arg_count)
@@ -186,7 +186,6 @@ local function main()
 				print("Successfully created scripture")
 			else
 				print(data)
-				return
 			end
 		else
 			print("Missing args to create scripture")
