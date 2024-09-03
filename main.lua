@@ -1,9 +1,3 @@
-local scriptures = {
-	["John 3:16"] = "For God loved the world so much he gave his only begotten son so that every one excercising faith in him might not be destroyed but have everlasting life.",
-	["John 17:3"] = "This means everlasting life, there coming to know you the only true God and the one whome you sent, Jesus Christ",
-	["Revelations 21:3,4"] = "3 With that I heard a loud voice from the throne say: “Look! The tent of God is with mankind, and he will reside with them, and they will be his people. And God himself will be with them. 4  And he will wipe out every tear from their eyes, and death will be no more, neither will mourning nor outcry nor pain be anymore. The former things have passed away.",
-}
-
 local function get_length_of_table(table)
 	local length = 0
 	for k, v in pairs(table) do
@@ -55,10 +49,12 @@ local function get_and_split_terminal_rows_and_cols()
 
 	if rows_handler then
 		terminal_rows = rows_handler:read("*a")
+		rows_handler:close()
 	end
 
 	if cols_handler then
 		terminal_cols = cols_handler:read("*a")
+		cols_handler:close()
 	end
 
 	if terminal_rows ~= 0 or terminal_rows ~= nil then
@@ -68,12 +64,38 @@ local function get_and_split_terminal_rows_and_cols()
 	if terminal_cols ~= 0 or terminal_cols ~= nil then
 		terminal_cols = math.floor(terminal_cols / 2)
 	end
+
 	return { terminal_rows, terminal_cols }
 end
 
 local function main()
 	-- Clear screen
 	os.execute("clear")
+
+	local file = io.open("scriptures", "r")
+
+	local scriptures = {}
+
+	if file then
+		local scripture_block = 0
+		local scripture_name = ""
+		for x in file:lines() do
+			if x == "###" then
+				scripture_block = scripture_block + 1
+			end
+			if scripture_block == 0 then
+				scripture_name = x
+			end
+			if scripture_block == 1 then
+				scriptures[scripture_name] = x
+			end
+			if scripture_block ~= 0 and scripture_block % 2 == 0 then
+				scripture_block = 0
+				scripture_name = ""
+			end
+		end
+		file:close()
+	end
 
 	local length = get_length_of_table(scriptures)
 	local random_index = math.random(0, length - 1)
