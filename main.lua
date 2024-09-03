@@ -71,6 +71,9 @@ local function get_and_split_terminal_rows_and_cols()
 end
 
 local function print_scripture()
+	-- Clear screen
+	os.execute("clear")
+
 	local length = get_length_of_table(SCRIPTURES)
 	local random_index = math.random(0, length - 1)
 	local random_scripture = get_random_scripture(SCRIPTURES, random_index)
@@ -88,9 +91,6 @@ local function print_scripture()
 end
 
 local function load_scriptures_from_file()
-	-- Clear screen
-	os.execute("clear")
-
 	local file = io.open("scriptures", "r")
 
 	if file then
@@ -113,6 +113,19 @@ local function load_scriptures_from_file()
 		end
 		file:close()
 	end
+end
+
+local function create_scripture(scripture, text)
+	print("creating scripture", scripture, text)
+	local file = io.open("scriptures", "a+")
+	if file then
+		file:write("###\n")
+		file:write(scripture .. "\n")
+		file:write("###\n")
+		file:write(text .. "\n")
+		file:close()
+	end
+	load_scriptures_from_file()
 end
 
 local function main()
@@ -138,7 +151,7 @@ local function main()
 	end
 	if args[1] == "create" then
 		if args[2] and args[3] then
-			print(args[2], args[3])
+			create_scripture(args[2], args[3])
 		else
 			print("Missing args to create scripture")
 			print('e.g. lua main.lua create "John 3:16" "For God loved the world..."')
