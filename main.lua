@@ -1,4 +1,5 @@
 SCRIPTURES = {}
+ARGS = arg
 
 local function get_length_of_table(table)
 	local length = 0
@@ -125,15 +126,25 @@ local function create_scripture(scripture, text)
 		file:write(text .. "\n")
 		file:close()
 	end
-	load_scriptures_from_file()
+	if pcall(load_scriptures_from_file) then
+		print("Successfully loaded scriptures from file")
+	else
+		print("Failed to load scriptures from file")
+	end
+	return "success"
 end
 
 local function main()
-	local args = arg
-	load_scriptures_from_file()
-
+	local load_success, load_data = pcall(load_scriptures_from_file)
 	local arg_count = 0
-	for index in pairs(args) do
+
+	if load_success then
+		print("Successfully loaded scriptures from file")
+	else
+		print("Failed to load scriptures from file", load_data)
+	end
+
+	for index in pairs(ARGS) do
 		if arg_count > 3 then
 			print("Invalid number of arguments")
 			print('e.g. lua main.lua create "John 3:16" "For God loved the world..."')
@@ -146,12 +157,22 @@ local function main()
 		arg_count = arg_count + 1
 	end
 
-	if args[1] == "print" then
-		print_scripture()
+	if ARGS[1] == "print" then
+		local success, data = pcall(print_scripture)
+		if success == false then
+			print("Failed to print scripture", data)
+			return
+		end
 	end
-	if args[1] == "create" then
-		if args[2] and args[3] then
-			create_scripture(args[2], args[3])
+
+	if ARGS[1] == "create" then
+		if ARGS[2] and ARGS[3] then
+			local success, data = pcall(create_scripture, ARGS[2], ARGS[3])
+			if success then
+				print("Successfully created scripture")
+			else
+				print("Something went wrong when creating scripture", data)
+			end
 		else
 			print("Missing args to create scripture")
 			print('e.g. lua main.lua create "John 3:16" "For God loved the world..."')
