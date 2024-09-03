@@ -1,5 +1,31 @@
 SCRIPTURES = {}
 ARGS = arg
+-- ("27[39m\\033[49m                 - Reset color")
+-- ("\27[2K                          - Clear Line")
+-- ("\27[<L>;<C>H or \\033[<L>;<C>f  - Put the cursor at line L and column C.")
+-- ("\27[<N>A                        - Move the cursor up N lines")
+-- ("\27[<N>B                        - Move the cursor down N lines")
+-- ("\27[<N>C                        - Move the cursor forward N columns")
+-- ("\27[<N>D                        - Move the cursor backward N columns\n")
+-- ("\27[2J                          - Clear the screen, move to (0,0)")
+-- ("\27[K                           - Erase to end of line")
+-- ("\27[s                           - Save cursor position")
+-- ("\27[u                           - Restore cursor position\n")
+-- ("\27[4m                          - Underline on")
+-- ("\27[24m                         - Underline off\n")
+-- ("\27[1m                          - Bold on")
+-- ("\27[21m                         - Bold off")
+
+local colors = {
+	reset = "\27[0m",
+	red = "\27[31m",
+	green = "\27[32m",
+	yellow = "\27[33m",
+	blue = "\27[34m",
+	magenta = "\27[35m",
+	cyan = "\27[36m",
+	white = "\27[37m",
+}
 
 local function get_length_of_table(table)
 	local length = 0
@@ -21,8 +47,8 @@ local function get_random_scripture(scripture_table, index)
 end
 
 local function add_formatting(scripture, text, terminal_rows, terminal_cols)
-	local scrip = scripture
-	local txt = text
+	local scrip = "\27[4m" .. "\27[3m" .. colors.red .. scripture .. colors.reset
+	local txt = "\27[3m" .. colors.blue .. text .. colors.reset
 	local rows = terminal_rows
 	local cols = terminal_cols
 
