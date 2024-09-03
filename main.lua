@@ -1,3 +1,5 @@
+SCRIPTURES = {}
+
 local function get_length_of_table(table)
 	local length = 0
 	for k, v in pairs(table) do
@@ -68,13 +70,28 @@ local function get_and_split_terminal_rows_and_cols()
 	return { terminal_rows, terminal_cols }
 end
 
-local function main()
+local function print_scripture()
+	local length = get_length_of_table(SCRIPTURES)
+	local random_index = math.random(0, length - 1)
+	local random_scripture = get_random_scripture(SCRIPTURES, random_index)
+	if random_scripture then
+		-- 1 indexes are crazy
+		local scripture = random_scripture[1]
+		local text = random_scripture[2]
+		local rows_and_cols = get_and_split_terminal_rows_and_cols()
+		local terminal_rows = rows_and_cols[1]
+		local terminal_cols = rows_and_cols[2]
+		print_random_scripture(scripture, text, terminal_rows, terminal_cols)
+		return
+	end
+	print("Error happened. Couldn't find a scripture.")
+end
+
+local function load_scriptures_from_file()
 	-- Clear screen
 	os.execute("clear")
 
 	local file = io.open("scriptures", "r")
-
-	local scriptures = {}
 
 	if file then
 		local scripture_block = 0
@@ -87,7 +104,7 @@ local function main()
 				scripture_name = x
 			end
 			if scripture_block == 1 then
-				scriptures[scripture_name] = x
+				SCRIPTURES[scripture_name] = x
 			end
 			if scripture_block ~= 0 and scripture_block % 2 == 0 then
 				scripture_block = 0
@@ -96,21 +113,37 @@ local function main()
 		end
 		file:close()
 	end
+end
 
-	local length = get_length_of_table(scriptures)
-	local random_index = math.random(0, length - 1)
-	local random_scripture = get_random_scripture(scriptures, random_index)
-	if random_scripture then
-		-- 1 indexes are crazy
-		local scripture = random_scripture[1]
-		local text = random_scripture[2]
-		local rows_and_cols = get_and_split_terminal_rows_and_cols()
-		local terminal_rows = rows_and_cols[1]
-		local terminal_cols = rows_and_cols[2]
-		print_random_scripture(scripture, text, terminal_rows, terminal_cols)
-		return
+local function main()
+	local args = arg
+	load_scriptures_from_file()
+
+	local arg_count = 0
+	for index in pairs(args) do
+		if arg_count > 3 then
+			print("Invalid number of arguments")
+			print('e.g. lua main.lua create "John 3:16" "For God loved the world..."')
+			print("e.g. lua main.lua print")
+			return
+		end
+		if index == -1 then
+			break
+		end
+		arg_count = arg_count + 1
 	end
-	print("Error happened. Couldn't find a scripture.")
+
+	if args[1] == "print" then
+		print_scripture()
+	end
+	if args[1] == "create" then
+		if args[2] and args[3] then
+			print(args[2], args[3])
+		else
+			print("Missing args to create scripture")
+			print('e.g. lua main.lua create "John 3:16" "For God loved the world..."')
+		end
+	end
 end
 
 main()
