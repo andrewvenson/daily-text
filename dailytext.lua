@@ -48,6 +48,30 @@ local function add_formatting(scripture, text, terminal_rows, terminal_cols)
 	local txt = "\27[3;33;40m" .. text .. "\27[0m"
 	local rows = terminal_rows
 	local cols = terminal_cols
+	local txt_length = string.len(txt)
+	local new_text = ""
+
+	local x = 0
+	local y = 0
+	while txt_length ~= x do
+		if x ~= 0 and x % terminal_cols == 0 then
+			local new_y = y
+			if string.sub(txt, y, y) == " " then
+				new_y = y + 1
+			end
+			new_text = new_text .. string.sub(txt, new_y, x) .. "\n"
+			y = x + 1
+		end
+		x = x + 1
+	end
+
+	if txt_length % cols ~= 0 then
+		if string.sub(txt, y, y) == " " then
+			new_text = new_text .. string.sub(txt, y + 1)
+		else
+			new_text = new_text .. string.sub(txt, y)
+		end
+	end
 
 	while cols ~= 0 + string.len(scripture) do
 		scrip = " " .. scrip
@@ -56,10 +80,10 @@ local function add_formatting(scripture, text, terminal_rows, terminal_cols)
 
 	while rows ~= 0 do
 		scrip = "\n" .. scrip
-		txt = txt .. "\n"
+		new_text = new_text .. "\n"
 		rows = rows - 1
 	end
-	return { scrip, "\n\n" .. txt }
+	return { scrip, "\n\n" .. new_text }
 end
 
 local function print_random_scripture(scripture, text, terminal_rows, terminal_cols)
