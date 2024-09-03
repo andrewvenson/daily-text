@@ -15,17 +15,14 @@ ARGS = arg
 -- ("\27[24m                         - Underline off\n")
 -- ("\27[1m                          - Bold on")
 -- ("\27[21m                         - Bold off")
-
-local colors = {
-	reset = "\27[0m",
-	red = "\27[31m",
-	green = "\27[32m",
-	yellow = "\27[33m",
-	blue = "\27[34m",
-	magenta = "\27[35m",
-	cyan = "\27[36m",
-	white = "\27[37m",
-}
+-- reset = "\27[0m",
+-- red = "\27[31m",
+-- green = "\27[32m",
+-- yellow = "\27[33;40m",
+-- blue = "\27[34m",
+-- magenta = "\27[35m",
+-- cyan = "\27[36m",
+-- white = "\27[37m",
 
 local function get_length_of_table(table)
 	local length = 0
@@ -47,8 +44,8 @@ local function get_random_scripture(scripture_table, index)
 end
 
 local function add_formatting(scripture, text, terminal_rows, terminal_cols)
-	local scrip = "\27[4m" .. "\27[3m" .. colors.red .. scripture .. colors.reset
-	local txt = "\27[3m" .. colors.blue .. text .. colors.reset
+	local scrip = "\27[3;31;4m" .. scripture .. "\27[0m"
+	local txt = "\27[3;33;40m" .. text .. "\27[0m"
 	local rows = terminal_rows
 	local cols = terminal_cols
 
