@@ -131,13 +131,13 @@ local function add_formatting(scripture, text, terminal_rows, terminal_cols)
 	cols = terminal_cols
 
 	-- centers scripture name in console horizontally
-	while cols ~= 0 + string.len(scripture) do
+	while cols ~= 0 + math.floor(string.len(scripture) / 2) do
 		scrip = " " .. scrip
 		cols = cols - 1
 	end
 
 	-- centers scripture name in console vertically
-	-- Adds padding to bottom of last line of text
+	-- Adds padding to bottom of last line of scripture text
 	while rows ~= 0 do
 		scrip = "\n" .. scrip
 		texts_to_print[texts_to_print_length] = texts_to_print[texts_to_print_length] .. "\n"
@@ -155,7 +155,7 @@ end
 
 local function print_random_scripture(scripture, text, terminal_rows, terminal_cols)
 	local formatted_scripture = add_formatting(scripture, text, terminal_rows, terminal_cols)
-	print(formatted_scripture[1] .. "\n\n")
+	print(formatted_scripture[1] .. "\n")
 	print(formatted_scripture[2])
 end
 
