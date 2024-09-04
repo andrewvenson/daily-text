@@ -60,7 +60,6 @@ local function add_formatting(scripture, text, terminal_rows, terminal_cols)
 			local new_y = y
 			-- removes leading space if there is one from the line of text
 			if string.sub(txt, y, y) == " " then
-				print("txt is empty", y)
 				new_y = y + 1
 			end
 
