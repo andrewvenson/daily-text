@@ -54,16 +54,42 @@ local function add_formatting(scripture, text, terminal_rows, terminal_cols)
 	local x = 0
 	local y = 0
 
-	while txt_length ~= x do
+	while x <= txt_length do
+		local last_char_is_empty = false
 		if x ~= 0 and x % terminal_cols == 0 then
 			local new_y = y
+			-- removes leading space if there is one from the line of text
 			if string.sub(txt, y, y) == " " then
+				print("txt is empty", y)
 				new_y = y + 1
 			end
 
+			-- last character of the current line of text to be proccessed
+			local last_char = string.sub(string.sub(txt, new_y, x), string.len(string.sub(txt, new_y, x)))
+
+			if last_char ~= " " then
+				local lc_inc = x
+				-- this will increment to the end of the word so it doesn't show up broken on 2 lines
+				while last_char ~= " " and lc_inc < string.len(txt) do
+					last_char = string.sub(string.sub(txt, new_y, lc_inc), string.len(string.sub(txt, new_y, lc_inc)))
+					if
+						string.sub(string.sub(txt, new_y, lc_inc + 1), string.len(string.sub(txt, new_y, lc_inc + 1)))
+						== " "
+					then
+						break
+					end
+					lc_inc = lc_inc + 1
+				end
+				x = lc_inc
+			else
+				-- this should remove trailing space
+				last_char_is_empty = true
+				x = x - 1
+			end
+
 			local txt_to_set = "\27[3;33;40m" .. string.sub(txt, new_y, x) .. "\27[0m"
+			-- adds padding to left of scripture text to center horizontally in console
 			while cols ~= 0 + math.floor(string.len(string.sub(txt, new_y, x)) / 2) do
-				-- adds padding to left of scripture text to center horizontally in console
 				txt_to_set = " " .. txt_to_set
 				cols = cols - 1
 			end
@@ -72,9 +98,15 @@ local function add_formatting(scripture, text, terminal_rows, terminal_cols)
 			texts_to_print_length = texts_to_print_length + 1
 			y = x + 1
 		end
-		x = x + 1
+		if last_char_is_empty then
+			-- we make sure we include the word after trailing space at the start of next iteration
+			x = x + 2
+		else
+			x = x + 1
+		end
 	end
 
+	-- adds left padding to last line of scripture text
 	if txt_length % cols ~= 0 then
 		if string.sub(txt, y, y) == " " then
 			local txt_to_set = "\27[3;33;40m" .. string.sub(txt, y + 1) .. "\27[0m"
@@ -98,16 +130,16 @@ local function add_formatting(scripture, text, terminal_rows, terminal_cols)
 
 	cols = terminal_cols
 
+	-- centers scripture name in console horizontally
 	while cols ~= 0 + string.len(scripture) do
-		-- centers scripture name in console horizontally
 		scrip = " " .. scrip
 		cols = cols - 1
 	end
 
+	-- centers scripture name in console vertically
+	-- Adds padding to bottom of last line of text
 	while rows ~= 0 do
-		-- centers scripture name in console vertically
 		scrip = "\n" .. scrip
-		-- Adds padding to bottom of last line of text
 		texts_to_print[texts_to_print_length] = texts_to_print[texts_to_print_length] .. "\n"
 		rows = rows - 1
 	end
